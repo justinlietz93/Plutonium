@@ -1,0 +1,25 @@
+{
+  "OutputFile": "dependency_report.md",
+  "Directories": [
+    {
+      "Path": "path/to/your/node_project",
+      "Environments": ["Node.js"]
+    },
+    {
+      "Path": "path/to/your/python_project",
+      "Environments": ["Python"]
+    },
+    {
+      "Path": "path/to/your/ruby_project",
+      "Environments": ["Ruby"]
+    },
+    {
+      "Path": "path/to/your/java_project",
+      "Environments": ["Maven"]
+    },
+    {
+      "Path": "path/to/your/go_project",
+      "Environments": ["Go"]
+    }
+  ]
+}

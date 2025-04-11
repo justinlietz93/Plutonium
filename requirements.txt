@@ -1,0 +1,11 @@
+# LLM Prompt: List the runtime and development dependencies for this project.
+# Start with:
+requests>=2.28.0 # For fetching latest versions via API
+
+# Add development dependencies if needed:
+# pytest>=7.0.0 # For running tests
+# pyinstaller>=5.0.0 # For packaging (if using build.py)
+# black # For code formatting
+# flake8 # For linting
+# mypy # For type checking
+
