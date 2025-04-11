@@ -91,12 +91,15 @@ class NodeJsAnalyzer(IDependencyAnalyzer):
             ValueError: If the package doesn't exist or another error occurs
         """
         # Check cache first
-        cache_key = f"npm:{package_name}"
-        cached_version = self.cache.get(cache_key)
-        if cached_version:
-            self.logger.debug(f"Cache hit for {package_name}: {cached_version}")
-            return cached_version
-        
+
+        # cache_key = f"npm:{package_name}"
+        # cached_version = self.cache.get(cache_key)
+        # if cached_version:
+        #     self.logger.debug(f"Cache hit for {package_name}: {cached_version}")
+        #     return cached_version
+        # ... fetch latest version ...
+        # self.cache.set(cache_key, latest_version)
+
         # Not in cache, fetch from npm registry
         url = API_URLS['npm'].format(package=package_name)
         self.logger.debug(f"Fetching latest version for {package_name} from {url}")
@@ -110,7 +113,7 @@ class NodeJsAnalyzer(IDependencyAnalyzer):
                 latest_version = data['dist-tags']['latest']
                 
                 # Update cache
-                self.cache.set(cache_key, latest_version)
+                # self.cache.set(cache_key, latest_version)
                 
                 return latest_version
             else:

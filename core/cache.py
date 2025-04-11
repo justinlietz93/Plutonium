@@ -7,6 +7,7 @@ the latest versions of dependencies to reduce API calls.
 
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -14,22 +15,30 @@ from typing import Dict, Optional
 class VersionCache:
     """A simple cache for storing the latest versions of dependencies."""
     
-    # Cache file path
-    CACHE_FILE = Path("version_cache.json")
-    
-    def __init__(self):
+    def __init__(self, cache_file: str = "version_cache.json"):
         """Initialize the cache from the cache file or create an empty cache."""
         self.cache: Dict[str, str] = {}
+        # Resolve cache file path relative to the executable (if running as PyInstaller bundle)
+        if getattr(sys, 'frozen', False):  # Running as executable
+            base_path = os.path.dirname(sys.executable)
+        else:  # Running as script
+            base_path = os.getcwd()
+        print(f"Base path: {base_path}")  # Debug print
+        self.cache_file = Path(base_path) / cache_file
+        print(f"Using cache file: {self.cache_file}")  # Debug print
         
         try:
-            if self.CACHE_FILE.exists():
-                with open(self.CACHE_FILE, 'r') as f:
+            print(f"Checking if cache file exists: {self.cache_file}")  # Debug print
+            if self.cache_file.exists():
+                print(f"Cache file exists, attempting to read")  # Debug print
+                with open(self.cache_file, 'r') as f:
                     self.cache = json.load(f)
+            else:
+                print("Cache file does not exist, starting with empty cache")
+                self.cache = {}
         except (json.JSONDecodeError, IOError, Exception) as e:
-            # If there's an error reading the cache, start with an empty cache
-            self.cache = {}
-            # In a real application, we might want to log this error
             print(f"Error loading cache: {e}")
+            self.cache = {}
     
     def get(self, package_key: str) -> Optional[str]:
         """
@@ -55,11 +64,23 @@ class VersionCache:
         
         try:
             # Ensure the directory exists
-            os.makedirs(os.path.dirname(self.CACHE_FILE), exist_ok=True)
+            cache_dir = os.path.dirname(self.cache_file)
+            if cache_dir:  # Only call makedirs if there's a directory component
+                print(f"Creating directory: {cache_dir}")  # Debug print
+                os.makedirs(cache_dir, exist_ok=True)
+            else:
+                print("No directory component in cache file path; skipping makedirs")
+            
+            # Verify write permissions
+            print(f"Checking write permissions for directory: {cache_dir}")
+            if not os.access(cache_dir, os.W_OK):
+                raise PermissionError(f"No write permissions for directory: {cache_dir}")
             
             # Write the cache to the file
-            with open(self.CACHE_FILE, 'w') as f:
+            print(f"Writing to cache file: {self.cache_file}")  # Debug print
+            with open(self.cache_file, 'w') as f:
                 json.dump(self.cache, f, indent=2)
+            print(f"Successfully wrote to cache file: {self.cache_file}")
         except (IOError, Exception) as e:
-            # In a real application, we would log this error
-            print(f"Error saving cache: {e}")
+            print(f"Failed to write cache file {self.cache_file}: {e}")
+            raise  # Re-raise to ensure the error is not swallowed

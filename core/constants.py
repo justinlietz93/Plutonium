@@ -35,4 +35,4 @@ API_URLS = {
 # Other constants
 DEFAULT_TIMEOUT = 10  # seconds
 CACHE_TTL = 86400  # 24 hours in seconds
-DEFAULT_OUTPUT_FILE = "dependency_report.md"
+DEFAULT_OUTPUT_FILE = "plutonium_report.md"

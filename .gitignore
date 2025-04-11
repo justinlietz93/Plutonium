@@ -1,0 +1,131 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+*.mo
+*.pot
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+instance/
+.webassets-cache
+.scrapy
+
+# Virtualenv
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Build outputs
+dist/
+build/
+out/
+
+# Sensitive files
+.env*
+*.pem
+*.key
+credentials*
+secrets*
+config.json
+
+# Template Specific Ignores
+# -------------------------
+
+# Python AI Agent Template
+template-python-ai-agent/data/*
+template-python-ai-agent/models/*
+template-python-ai-agent/.venv
+template-python-ai-agent/**/__pycache__/
+template-python-ai-agent/**/*.pyc
+template-python-ai-agent/*.egg-info/
+
+# C++ / CMake Template
+template-cpp-cmake/build/
+template-cpp-cmake/CMake*/
+template-cpp-cmake/**/*.o
+template-cpp-cmake/**/*.a
+template-cpp-cmake/**/*.so
+template-cpp-cmake/**/*.dll
+template-cpp-cmake/**/*.exe
+template-cpp-cmake/compile_commands.json
+template-cpp-cmake/.vs/
+template-cpp-cmake/vcpkg_installed/
+# Add other C++ specific ignores if needed
+
+# Rust / Cargo Template
+template-rust-cargo/target/
+template-rust-cargo/Cargo.lock
+
+# Go / Module Template
+template-go-module/template-go-module # Example binary name
+template-go-module/main # Example binary name
+template-go-module/*.exe # Windows binaries
+template-go-module/vendor/ # Go vendor directory
+config.json

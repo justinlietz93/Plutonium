@@ -40,7 +40,7 @@ class TestLogging:
             # Verify logging.basicConfig was called with the expected parameters
             mock_basic_config.assert_called_once()
             args, kwargs = mock_basic_config.call_args
-            assert kwargs['filename'] == "dependency_analyzer.log"
+            assert kwargs['filename'] == "plutonium.log"
             assert kwargs['level'] == logging.INFO
             assert kwargs['filemode'] == "a"  # Append mode by default
             
@@ -96,7 +96,7 @@ class TestLogging:
     
     def test_setup_logging_creates_directory(self):
         """Test that setup_logging creates the log directory if it doesn't exist."""
-        log_file = "logs/dependency_analyzer.log"
+        log_file = "logs/plutonium.log"
         
         # Mock the necessary functions
         with patch('logging.basicConfig'), \

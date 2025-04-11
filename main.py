@@ -13,10 +13,10 @@ import os
 import sys
 from pathlib import Path
 
-from core.generator import DependencyReportGenerator
-from core.logging import setup_logging
-from core.constants import DEFAULT_OUTPUT_FILE
-from core.exceptions import DependencyAnalyzerError, ConfigurationError
+from plutonium.core.generator import DependencyReportGenerator
+from plutonium.core.logging import setup_logging
+from plutonium.core.constants import DEFAULT_OUTPUT_FILE
+from plutonium.core.exceptions import DependencyAnalyzerError, ConfigurationError
 
 
 def main():

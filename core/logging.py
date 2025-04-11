@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 
 
-def setup_logging(log_file="dependency_analyzer.log", level=logging.INFO, file_mode="a"):
+def setup_logging(log_file="plutonium.log", level=logging.INFO, file_mode="a"):
     """
     Set up logging configuration for the application.
     

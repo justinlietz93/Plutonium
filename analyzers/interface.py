@@ -140,9 +140,20 @@ class IDependencyAnalyzer(ABC):
             content: The content to write
             mode: The file mode ('a' for append, 'w' for write/overwrite)
         """
-        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+        self.logger.debug(f"Attempting to write to report file: {output_file} with mode: {mode}")
+        output_path = Path(output_file)
+        output_dir = output_path.parent
+        self.logger.debug(f"Output directory: {output_dir}")
+        if output_dir != Path('.'):
+            self.logger.debug(f"Creating directory: {output_dir}")
+            os.makedirs(output_dir, exist_ok=True)
+        self.logger.debug(f"Checking write permissions for directory: {output_dir}")
+        if not os.access(output_dir, os.W_OK):
+            raise PermissionError(f"No write permissions for directory: {output_dir}")
+        self.logger.debug(f"Writing content to {output_file}")
         with open(output_file, mode, encoding='utf-8') as f:
             f.write(content)
+        self.logger.debug(f"Successfully wrote to {output_file}")
         
     def format_markdown_section(self, directory: str, dependencies: List[Tuple[str, str, str]]) -> str:
         """

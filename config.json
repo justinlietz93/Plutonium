@@ -1,25 +1,19 @@
 {
-  "OutputFile": "dependency_report.md",
+  "OutputFile": "plutonium_report.md",
+  "CacheFile": "version_cache.json",
+  "LogFile": "plutonium.log",
   "Directories": [
     {
-      "Path": "path/to/your/node_project",
+      "Path": "C:\\git\\CodeGen_IDE\\codegenesis\\webview-ui",
       "Environments": ["Node.js"]
     },
     {
-      "Path": "path/to/your/python_project",
+      "Path": "C:\\git\\CodeGen_IDE\\codegenesis",
+      "Environments": ["Node.js"]
+    },
+    {
+      "Path": "C:\\git\\CodeGen_IDE\\codegenesis\\python_backend",
       "Environments": ["Python"]
-    },
-    {
-      "Path": "path/to/your/ruby_project",
-      "Environments": ["Ruby"]
-    },
-    {
-      "Path": "path/to/your/java_project",
-      "Environments": ["Maven"]
-    },
-    {
-      "Path": "path/to/your/go_project",
-      "Environments": ["Go"]
     }
   ]
 }

@@ -109,13 +109,6 @@ class PythonAnalyzer(IDependencyAnalyzer):
         # Normalize package name (PyPI is case-insensitive)
         package_name = package_name.lower()
         
-        # Check cache first
-        cache_key = f"pypi:{package_name}"
-        cached_version = self.cache.get(cache_key)
-        if cached_version:
-            self.logger.debug(f"Cache hit for {package_name}: {cached_version}")
-            return cached_version
-        
         # Not in cache, fetch from PyPI
         url = API_URLS['PyPI'].format(package=package_name)
         self.logger.debug(f"Fetching latest version for {package_name} from {url}")
@@ -127,10 +120,6 @@ class PythonAnalyzer(IDependencyAnalyzer):
             data = response.json()
             if 'info' in data and 'version' in data['info']:
                 latest_version = data['info']['version']
-                
-                # Update cache
-                self.cache.set(cache_key, latest_version)
-                
                 return latest_version
             else:
                 raise ValueError(f"Unable to determine latest version for {package_name}")

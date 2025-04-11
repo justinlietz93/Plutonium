@@ -1,0 +1,42 @@
+Plutonium/
+├── analyzers/
+│   ├── __init__.py
+│   ├── interface.py
+│   ├── maven_analyzer.py
+│   ├── nodejs_analyzer.py
+│   ├── python_analyzer.py
+│   ├── ruby_analyzer.py
+│   └── go_analyzer.py
+├── core/
+│   ├── __init__.py
+│   ├── cache.py
+│   ├── config_validator.py
+│   ├── constants.py
+│   ├── exceptions.py
+│   ├── factory.py
+│   ├── generator.py
+│   └── logging.py
+├── docs/
+│   ├── architecture.md
+│   └── contributing.md
+├── tests/
+│   ├── __init__.py
+│   ├── test_factory.py
+│   ├── test_generator.py
+│   ├── test_nodejs_analyzer.py
+│   ├── test_python_analyzer.py
+│   ├── test_ruby_analyzer.py
+│   ├── test_maven_analyzer.py
+│   ├── test_go_analyzer.py
+│   ├── test_config_validator.py
+│   ├── test_cache.py
+│   ├── test_exceptions.py
+│   └── test_logging.py
+├── build.py
+├── CHANGELOG.md
+├── config.json
+├── LICENSE
+├── main.py
+├── project_map.txt
+├── README.md
+└── requirements.txt

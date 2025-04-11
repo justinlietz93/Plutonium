@@ -63,7 +63,7 @@ We follow standard Python best practices with some specific requirements:
 - Use [Black](https://black.readthedocs.io/) for code formatting with a line length of 88 characters:
 
   ```bash
-  black dependency_analyzer/
+  black plutonium/
   ```
 
 ### Linting
@@ -71,7 +71,7 @@ We follow standard Python best practices with some specific requirements:
 - Use [Flake8](https://flake8.pycqa.org/) for linting:
 
   ```bash
-  flake8 dependency_analyzer/
+  flake8 plutonium/
   ```
 
 ### Type Checking
@@ -79,7 +79,7 @@ We follow standard Python best practices with some specific requirements:
 - Use [MyPy](https://mypy.readthedocs.io/) for static type checking:
 
   ```bash
-  mypy dependency_analyzer/
+  mypy plutonium/
   ```
 
 - All new code should include type hints.
@@ -112,10 +112,10 @@ We use pytest for testing. To run the tests:
 pytest
 
 # Run tests with coverage
-pytest --cov=dependency_analyzer tests/
+pytest --cov=plutonium tests/
 
 # Generate coverage report
-pytest --cov=dependency_analyzer --cov-report=html tests/
+pytest --cov=plutonium --cov-report=html tests/
 ```
 
 ### Writing Tests

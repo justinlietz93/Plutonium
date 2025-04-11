@@ -8,6 +8,7 @@ by coordinating the various components of the dependency analyzer.
 import json
 import logging
 import os
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any
@@ -56,21 +57,33 @@ class DependencyReportGenerator:
             # Validate configuration
             ConfigValidator.validate(config)
             
-            # Get output file path from config or use default
+            # Get output file path from config or use default, resolve relative to executable
             output_file = config.get("OutputFile", self.default_output_file)
+            if getattr(sys, 'frozen', False):  # Running as executable
+                base_path = os.path.dirname(sys.executable)
+                output_file = str(Path(base_path) / output_file)
+            self.logger.debug(f"Resolved output file path: {output_file}")
             
-            # Create a shared cache for all analyzers
-            cache = VersionCache()
+            # Create a shared cache for all analyzers with the configured cache file
+            cache_file = config.get("CacheFile", "version_cache.json")
+            cache = VersionCache(cache_file)
             
             # Initialize report file with header
             self._initialize_report(output_file)
             
             # Process each directory
+            processed_directories = set()
             for directory_config in config["Directories"]:
                 directory = directory_config["Path"]
                 environments = directory_config["Environments"]
                 
+                # Skip if already processed
+                if directory in processed_directories:
+                    self.logger.warning(f"Directory {directory} already processed, skipping duplicate entry")
+                    continue
+                
                 self.logger.info(f"Processing directory: {directory}")
+                processed_directories.add(directory)
                 
                 # Verify directory exists
                 if not Path(directory).exists():

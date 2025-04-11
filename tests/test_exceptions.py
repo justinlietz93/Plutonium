@@ -22,7 +22,7 @@ from ..core.exceptions import (
 class TestCustomExceptions:
     """Test cases for the custom exception classes."""
     
-    def test_dependency_analyzer_error(self):
+    def test_plutonium_error(self):
         """Test the DependencyAnalyzerError exception."""
         # Verify that it inherits from Exception
         assert issubclass(DependencyAnalyzerError, Exception)
