@@ -8,7 +8,6 @@ import json
 import os
 import requests
 import logging
-import concurrent.futures
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 
@@ -72,7 +71,7 @@ class NodeJsAnalyzer(IDependencyAnalyzer):
                     dependencies[pkg] = version[1:]
             
             return dependencies
-            
+        
         except (json.JSONDecodeError, IOError) as e:
             raise ParsingError(f"Error parsing package.json: {str(e)}")
     
@@ -90,16 +89,6 @@ class NodeJsAnalyzer(IDependencyAnalyzer):
             NetworkError: If there's an issue fetching the latest version
             ValueError: If the package doesn't exist or another error occurs
         """
-        # Check cache first
-
-        # cache_key = f"npm:{package_name}"
-        # cached_version = self.cache.get(cache_key)
-        # if cached_version:
-        #     self.logger.debug(f"Cache hit for {package_name}: {cached_version}")
-        #     return cached_version
-        # ... fetch latest version ...
-        # self.cache.set(cache_key, latest_version)
-
         # Not in cache, fetch from npm registry
         url = API_URLS['npm'].format(package=package_name)
         self.logger.debug(f"Fetching latest version for {package_name} from {url}")
@@ -111,51 +100,14 @@ class NodeJsAnalyzer(IDependencyAnalyzer):
             data = response.json()
             if 'dist-tags' in data and 'latest' in data['dist-tags']:
                 latest_version = data['dist-tags']['latest']
-                
-                # Update cache
-                # self.cache.set(cache_key, latest_version)
-                
                 return latest_version
             else:
                 raise ValueError(f"Unable to determine latest version for {package_name}")
-                
+            
         except requests.RequestException as e:
             raise NetworkError(f"Error fetching latest version for {package_name}: {str(e)}")
         except (ValueError, KeyError) as e:
             raise ValueError(f"Error processing npm response for {package_name}: {str(e)}")
-    
-    def _get_installed_dependencies_with_latest(self, dependencies: Dict[str, str]) -> List[Tuple[str, str, str]]:
-        """
-        Get the latest versions for all dependencies.
-        
-        Args:
-            dependencies: A dictionary mapping package names to their current versions
-            
-        Returns:
-            A list of tuples (package_name, current_version, latest_version)
-        """
-        result = []
-        
-        # Use ThreadPoolExecutor to fetch latest versions concurrently
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            # Create a future for each dependency
-            future_to_package = {
-                executor.submit(self.get_latest_version, package): (package, current_version)
-                for package, current_version in dependencies.items()
-            }
-            
-            # Process results as they complete
-            for future in concurrent.futures.as_completed(future_to_package):
-                package, current_version = future_to_package[future]
-                try:
-                    latest_version = future.result()
-                    result.append((package, current_version, latest_version))
-                except Exception as e:
-                    self.logger.error(f"Error getting latest version for {package}: {str(e)}")
-                    # Include in the result with an error indicator
-                    result.append((package, current_version, "Error fetching"))
-        
-        return result
     
     def analyze_dependencies(self, directory: str, output_file: str) -> None:
         """
@@ -187,11 +139,11 @@ class NodeJsAnalyzer(IDependencyAnalyzer):
             
             self.logger.info(f"Found {len(dependencies)} dependencies")
             
-            # Get latest versions
-            dependencies_with_latest = self._get_installed_dependencies_with_latest(dependencies)
+            # Get latest versions and vulnerabilities
+            dependencies_with_latest_and_vulns = self._get_installed_dependencies_with_latest(dependencies)
             
             # Format and write to report
-            content = self.format_markdown_section(directory, dependencies_with_latest)
+            content = self.format_markdown_section(directory, dependencies_with_latest_and_vulns)
             self.write_to_report(output_file, content)
             
             self.logger.info(f"Node.js dependency analysis for {directory} completed")

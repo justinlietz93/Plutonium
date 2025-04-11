@@ -13,11 +13,15 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any
 
-from .factory import DependencyAnalyzerFactory
-from .config_validator import ConfigValidator
-from .constants import DEFAULT_OUTPUT_FILE
-from .exceptions import DependencyAnalyzerError, ConfigurationError, ParsingError
-from .cache import VersionCache
+from dotenv import load_dotenv
+
+# Use absolute imports
+from plutonium.core.factory import DependencyAnalyzerFactory
+from plutonium.core.config_validator import ConfigValidator
+from plutonium.core.constants import DEFAULT_OUTPUT_FILE
+from plutonium.core.exceptions import DependencyAnalyzerError, ConfigurationError, ParsingError
+from plutonium.core.cache import VersionCache
+from plutonium.core.report_formatter import ReportFormatter  # New import
 
 
 class DependencyReportGenerator:
@@ -32,6 +36,7 @@ class DependencyReportGenerator:
         """
         self.default_output_file = default_output_file
         self.logger = logging.getLogger("generator")
+        self.formatter = ReportFormatter()  # Initialize the report formatter
     
     def generate_report(self, config_path: str) -> None:
         """
@@ -46,6 +51,10 @@ class DependencyReportGenerator:
         """
         try:
             self.logger.info(f"Starting dependency report generation using config: {config_path}")
+            
+            # Load environment variables from .env file (kept for potential future use)
+            load_dotenv()
+            self.logger.debug("Loaded environment variables from .env file")
             
             # Read and parse configuration file
             try:
@@ -63,6 +72,12 @@ class DependencyReportGenerator:
                 base_path = os.path.dirname(sys.executable)
                 output_file = str(Path(base_path) / output_file)
             self.logger.debug(f"Resolved output file path: {output_file}")
+            
+            # Get NVD API key from environment variable (not used with VulnCheck, kept for compatibility)
+            nvd_api_key = os.getenv("NVD_API_KEY")
+            self.logger.debug(f"NVD_API_KEY environment variable value: {nvd_api_key}")
+            if nvd_api_key:
+                self.logger.info("NVD API key found in environment variable NVD_API_KEY (not used with VulnCheck NVD++)")
             
             # Create a shared cache for all analyzers with the configured cache file
             cache_file = config.get("CacheFile", "version_cache.json")
@@ -93,7 +108,7 @@ class DependencyReportGenerator:
                 
                 # Create analyzers for this directory
                 analyzers = DependencyAnalyzerFactory.create_analyzers(
-                    directory, environments, cache
+                    directory, environments, cache, nvd_api_key=nvd_api_key
                 )
                 
                 if not analyzers:
@@ -104,7 +119,15 @@ class DependencyReportGenerator:
                 for analyzer in analyzers:
                     try:
                         self.logger.info(f"Running {analyzer.environment_name} analyzer on {directory}")
-                        analyzer.analyze_dependencies(directory, output_file)
+                        # Get the raw dependency data from the analyzer
+                        dependency_info = analyzer.analyze_dependencies(directory)
+                        # Format the data as Markdown
+                        markdown_content = self.formatter.format_markdown_section(
+                            analyzer.environment_name, directory, dependency_info
+                        )
+                        # Write the formatted content to the report file
+                        self.formatter.write_to_report(output_file, markdown_content)
+                        self.logger.info(f"{analyzer.environment_name} dependency analysis for {directory} completed")
                     except Exception as e:
                         self.logger.error(
                             f"Error analyzing {analyzer.environment_name} dependencies in {directory}: {str(e)}"
@@ -134,14 +157,14 @@ class DependencyReportGenerator:
             output_file: The path to the output file
         """
         try:
-            # Ensure directory exists
-            os.makedirs(os.path.dirname(output_file) if os.path.dirname(output_file) else '.', exist_ok=True)
-            
-            with open(output_file, 'w', encoding='utf-8') as f:
-                f.write("# Dependency Analysis Report\n\n")
-                f.write(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
-                f.write("This report shows the current and latest versions of dependencies across projects.\n\n")
-                f.write("---\n\n")
+            # Use the formatter to write the header
+            header = (
+                "# Dependency Analysis Report\n\n"
+                f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                "This report shows the current and latest versions of dependencies across projects.\n\n"
+                "---\n\n"
+            )
+            self.formatter.write_to_report(output_file, header, mode='w')
         except IOError as e:
             raise DependencyAnalyzerError(f"Error initializing report file: {str(e)}")
     
@@ -154,8 +177,8 @@ class DependencyReportGenerator:
             error_message: The error message to append
         """
         try:
-            with open(output_file, 'a', encoding='utf-8') as f:
-                f.write(f"\n## Error\n\n{error_message}\n\n---\n\n")
+            error_content = f"\n## Error\n\n{error_message}\n\n---\n\n"
+            self.formatter.write_to_report(output_file, error_content)
         except IOError as e:
             self.logger.error(f"Error appending to report file: {str(e)}")
     
@@ -167,11 +190,13 @@ class DependencyReportGenerator:
             output_file: The path to the output file
         """
         try:
-            with open(output_file, 'a', encoding='utf-8') as f:
-                f.write("\n## Report Summary\n\n")
-                f.write("- ✅ = Up to date\n")
-                f.write("- ⚠️ = Update available\n\n")
-                f.write("---\n\n")
-                f.write("Report complete.\n")
+            footer = (
+                "\n## Report Summary\n\n"
+                "- ✅ = Up to date\n"
+                "- ⬆️ = Update available\n\n"
+                "---\n\n"
+                "Report complete.\n"
+            )
+            self.formatter.write_to_report(output_file, footer)
         except IOError as e:
             self.logger.error(f"Error finalizing report file: {str(e)}")

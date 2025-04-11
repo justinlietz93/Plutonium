@@ -36,3 +36,5 @@ API_URLS = {
 DEFAULT_TIMEOUT = 10  # seconds
 CACHE_TTL = 86400  # 24 hours in seconds
 DEFAULT_OUTPUT_FILE = "plutonium_report.md"
+DEFAULT_CONFIG_FILE = "config.json"
+DEFAULT_LOG_FILE = "plutonium.log"

@@ -6,12 +6,15 @@ It establishes the common interface and implements the Template Method pattern.
 """
 
 from abc import ABC, abstractmethod
-import os
 import logging
+import concurrent.futures
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 
-from ..core.cache import VersionCache
+# Use absolute imports
+from plutonium.core.cache import VersionCache
+from plutonium.core.constants import DEFAULT_TIMEOUT
+from plutonium.core.vulnerability_checker import VulnerabilityChecker
 
 
 class IDependencyAnalyzer(ABC):
@@ -22,14 +25,16 @@ class IDependencyAnalyzer(ABC):
     and provides some common functionality through the Template Method pattern.
     """
     
-    def __init__(self, cache: VersionCache = None):
+    def __init__(self, cache: VersionCache = None, nvd_api_key: str = None):
         """
-        Initialize the analyzer with an optional version cache.
+        Initialize the analyzer with an optional version cache and NVD API key.
         
         Args:
             cache: A VersionCache instance for caching version lookups
+            nvd_api_key: Optional NVD API key (not used with VulnCheck NVD++)
         """
         self.cache = cache or VersionCache()
+        self.vulnerability_checker = VulnerabilityChecker(api_key=nvd_api_key)
         self.logger = logging.getLogger(f"analyzer.{self.environment_name}")
     
     @property
@@ -61,27 +66,31 @@ class IDependencyAnalyzer(ABC):
         pass
     
     @abstractmethod
-    def analyze_dependencies(self, directory: str, output_file: str) -> None:
+    def analyze_dependencies(self, directory: str) -> List[Tuple[str, str, str, List[str]]]:
         """
-        Analyze dependencies in the specified directory and write results to the output file.
-        
-        This is the main method that implements the Template Method pattern. It should:
-        1. Parse the dependency file to extract dependencies
-        2. For each dependency, get the current and latest versions
-        3. Write the results to the output file
-        
+        Analyze dependencies in the specified directory and return the results.
+
         Args:
             directory: The directory containing the dependency file to analyze
-            output_file: The path to the output file where results will be written
+            
+        Returns:
+            A list of tuples (package_name, current_version, latest_version, vulnerabilities)
             
         Raises:
             FileNotFoundError: If the dependency file doesn't exist
             ParsingError: If there's an error parsing the dependency file
             NetworkError: If there's an issue fetching latest versions
         """
-        pass
-    
-    # Suggested internal methods for concrete implementations
+        # Find the dependency file
+        dependency_file = self._get_dependency_file_path(directory)
+        
+        # Parse the dependencies
+        dependencies = self._parse_dependencies(dependency_file)
+        
+        # Get the latest versions and vulnerabilities
+        dependency_info = self._get_installed_dependencies_with_latest(dependencies)
+        
+        return dependency_info
     
     def _get_dependency_file_path(self, directory: str) -> Path:
         """
@@ -96,8 +105,6 @@ class IDependencyAnalyzer(ABC):
         Raises:
             FileNotFoundError: If the dependency file doesn't exist
         """
-        # Concrete implementation should return the path to the 
-        # specific dependency file (e.g., package.json, requirements.txt)
         raise NotImplementedError()
     
     def _parse_dependencies(self, file_path: Path) -> Dict[str, str]:
@@ -113,69 +120,36 @@ class IDependencyAnalyzer(ABC):
         Raises:
             ParsingError: If there's an error parsing the dependency file
         """
-        # Concrete implementation should parse the specific dependency file format
         raise NotImplementedError()
     
-    def _get_installed_dependencies_with_latest(self, dependencies: Dict[str, str]) -> List[Tuple[str, str, str]]:
+    def _get_installed_dependencies_with_latest(self, dependencies: Dict[str, str]) -> List[Tuple[str, str, str, List[str]]]:
         """
-        Get the latest versions for all dependencies.
+        Get the latest versions and vulnerabilities for all dependencies.
         
         Args:
             dependencies: A dictionary mapping package names to their current versions
             
         Returns:
-            A list of tuples (package_name, current_version, latest_version)
+            A list of tuples (package_name, current_version, latest_version, vulnerabilities)
         """
-        # Concrete implementation should fetch the latest versions
-        raise NotImplementedError()
-    
-    # Helper methods
-    
-    def write_to_report(self, output_file: str, content: str, mode: str = 'a') -> None:
-        """
-        Write content to the report file.
+        result = []
         
-        Args:
-            output_file: The path to the output file
-            content: The content to write
-            mode: The file mode ('a' for append, 'w' for write/overwrite)
-        """
-        self.logger.debug(f"Attempting to write to report file: {output_file} with mode: {mode}")
-        output_path = Path(output_file)
-        output_dir = output_path.parent
-        self.logger.debug(f"Output directory: {output_dir}")
-        if output_dir != Path('.'):
-            self.logger.debug(f"Creating directory: {output_dir}")
-            os.makedirs(output_dir, exist_ok=True)
-        self.logger.debug(f"Checking write permissions for directory: {output_dir}")
-        if not os.access(output_dir, os.W_OK):
-            raise PermissionError(f"No write permissions for directory: {output_dir}")
-        self.logger.debug(f"Writing content to {output_file}")
-        with open(output_file, mode, encoding='utf-8') as f:
-            f.write(content)
-        self.logger.debug(f"Successfully wrote to {output_file}")
-        
-    def format_markdown_section(self, directory: str, dependencies: List[Tuple[str, str, str]]) -> str:
-        """
-        Format the dependencies as a Markdown section.
-        
-        Args:
-            directory: The directory being analyzed
-            dependencies: A list of tuples (package_name, current_version, latest_version)
+        # Use ThreadPoolExecutor to fetch latest versions and vulnerabilities concurrently
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            # Create a future for each dependency
+            future_to_package = {
+                executor.submit(lambda pkg, ver: (pkg, ver, self.get_latest_version(pkg), self.vulnerability_checker.fetch_vulnerabilities(pkg, ver, self.environment_name)), package, current_version): (package, current_version)
+                for package, current_version in dependencies.items()
+            }
             
-        Returns:
-            A formatted Markdown string
-        """
-        if not dependencies:
-            return f"## {self.environment_name} Dependencies in {directory}\n\nNo dependencies found.\n\n"
+            # Process results as they complete
+            for future in concurrent.futures.as_completed(future_to_package):
+                package, current_version = future_to_package[future]
+                try:
+                    pkg, ver, latest_version, vulnerabilities = future.result()
+                    result.append((pkg, ver, latest_version, vulnerabilities))
+                except Exception as e:
+                    self.logger.error(f"Error getting latest version or vulnerabilities for {package}: {str(e)}")
+                    result.append((package, current_version, "Error fetching", ["Error fetching"]))
         
-        lines = [f"## {self.environment_name} Dependencies in {directory}\n\n"]
-        lines.append("| Package | Current Version | Latest Version |\n")
-        lines.append("|---------|----------------|----------------|\n")
-        
-        for package, current, latest in sorted(dependencies):
-            status = "⚠️" if current != latest else "✅"
-            lines.append(f"| {package} | {current} | {latest} {status} |\n")
-        
-        lines.append("\n")
-        return "".join(lines)
+        return result

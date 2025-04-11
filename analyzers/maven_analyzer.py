@@ -169,39 +169,6 @@ class MavenAnalyzer(IDependencyAnalyzer):
         except (ValueError, KeyError) as e:
             raise ValueError(f"Error processing Maven Central response for {coordinate}: {str(e)}")
     
-    def _get_installed_dependencies_with_latest(self, dependencies: Dict[str, str]) -> List[Tuple[str, str, str]]:
-        """
-        Get the latest versions for all dependencies.
-        
-        Args:
-            dependencies: A dictionary mapping Maven coordinates to their current versions
-            
-        Returns:
-            A list of tuples (coordinate, current_version, latest_version)
-        """
-        result = []
-        
-        # Use ThreadPoolExecutor to fetch latest versions concurrently
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            # Create a future for each dependency
-            future_to_coordinate = {
-                executor.submit(self.get_latest_version, coordinate): (coordinate, current_version)
-                for coordinate, current_version in dependencies.items()
-            }
-            
-            # Process results as they complete
-            for future in concurrent.futures.as_completed(future_to_coordinate):
-                coordinate, current_version = future_to_coordinate[future]
-                try:
-                    latest_version = future.result()
-                    result.append((coordinate, current_version, latest_version))
-                except Exception as e:
-                    self.logger.error(f"Error getting latest version for {coordinate}: {str(e)}")
-                    # Include in the result with an error indicator
-                    result.append((coordinate, current_version, "Error fetching"))
-        
-        return result
-    
     def analyze_dependencies(self, directory: str, output_file: str) -> None:
         """
         Analyze Maven dependencies in the specified directory.

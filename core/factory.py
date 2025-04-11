@@ -9,17 +9,17 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-from ..analyzers.interface import IDependencyAnalyzer
-from ..core.cache import VersionCache
-from ..core.constants import SUPPORTED_ENVIRONMENTS, DEPENDENCY_FILES
+# Use absolute imports
+from plutonium.analyzers.interface import IDependencyAnalyzer
+from plutonium.core.cache import VersionCache
+from plutonium.core.constants import SUPPORTED_ENVIRONMENTS, DEPENDENCY_FILES
 
 # Import all concrete analyzer classes
-# These will be implemented in subsequent steps
-from ..analyzers.nodejs_analyzer import NodeJsAnalyzer
-from ..analyzers.python_analyzer import PythonAnalyzer
-from ..analyzers.ruby_analyzer import RubyAnalyzer
-from ..analyzers.maven_analyzer import MavenAnalyzer
-from ..analyzers.go_analyzer import GoAnalyzer
+from plutonium.analyzers.nodejs_analyzer import NodeJsAnalyzer
+from plutonium.analyzers.python_analyzer import PythonAnalyzer
+from plutonium.analyzers.ruby_analyzer import RubyAnalyzer
+from plutonium.analyzers.maven_analyzer import MavenAnalyzer
+from plutonium.analyzers.go_analyzer import GoAnalyzer
 
 
 class DependencyAnalyzerFactory:
@@ -27,7 +27,7 @@ class DependencyAnalyzerFactory:
     
     @staticmethod
     def create_analyzers(directory: str, environments: List[str], 
-                         cache: Optional[VersionCache] = None) -> List[IDependencyAnalyzer]:
+                         cache: Optional[VersionCache] = None, nvd_api_key: str = None) -> List[IDependencyAnalyzer]:
         """
         Create analyzers for the specified environments.
         
@@ -35,12 +35,14 @@ class DependencyAnalyzerFactory:
             directory: The directory to analyze
             environments: List of environments to analyze
             cache: Optional VersionCache instance to share across analyzers
+            nvd_api_key: Optional NVD API key (not used with VulnCheck NVD++)
             
         Returns:
             A list of dependency analyzers
         """
         analyzers = []
         logger = logging.getLogger("factory")
+        logger.debug(f"Creating analyzers with NVD API key: {nvd_api_key} (not used with VulnCheck NVD++)")
         
         # Create a shared cache if none is provided
         if cache is None:
@@ -64,15 +66,15 @@ class DependencyAnalyzerFactory:
             analyzer = None
             
             if env == "Node.js":
-                analyzer = NodeJsAnalyzer(cache)
+                analyzer = NodeJsAnalyzer(cache=cache, nvd_api_key=nvd_api_key)
             elif env == "Python":
-                analyzer = PythonAnalyzer(cache)
+                analyzer = PythonAnalyzer(cache=cache, nvd_api_key=nvd_api_key)
             elif env == "Ruby":
-                analyzer = RubyAnalyzer(cache)
+                analyzer = RubyAnalyzer(cache=cache, nvd_api_key=nvd_api_key)
             elif env == "Maven":
-                analyzer = MavenAnalyzer(cache)
+                analyzer = MavenAnalyzer(cache=cache, nvd_api_key=nvd_api_key)
             elif env == "Go":
-                analyzer = GoAnalyzer(cache)
+                analyzer = GoAnalyzer(cache=cache, nvd_api_key=nvd_api_key)
                 
             if analyzer:
                 logger.info(f"Created analyzer for {env}")

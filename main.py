@@ -1,85 +1,87 @@
-#!/usr/bin/env python3
 """
-Dependency Analyzer Tool
+Main entry point for the Dependency Analyzer.
 
-This is the main entry point for the dependency analyzer tool, which analyzes
-dependencies across multiple programming environments and generates a report
-comparing current versions with the latest available versions.
+This script initializes logging, parses command-line arguments,
+and starts the dependency report generation process.
 """
 
 import argparse
 import logging
-import os
 import sys
 from pathlib import Path
 
+# Use absolute imports
 from plutonium.core.generator import DependencyReportGenerator
-from plutonium.core.logging import setup_logging
-from plutonium.core.constants import DEFAULT_OUTPUT_FILE
-from plutonium.core.exceptions import DependencyAnalyzerError, ConfigurationError
+from plutonium.core.constants import DEFAULT_CONFIG_FILE, DEFAULT_LOG_FILE
 
 
-def main():
-    """Main entry point for the dependency analyzer tool."""
-    # Set up command-line argument parsing
-    parser = argparse.ArgumentParser(description="Analyze dependencies across multiple programming environments")
+def setup_logging(log_file: str) -> None:
+    """
+    Set up logging to both a file and the console.
+    
+    Args:
+        log_file: The path to the log file
+    """
+    # Ensure the log directory exists
+    log_path = Path(log_file)
+    log_dir = log_path.parent
+    log_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Create a logger
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)  # Set to DEBUG to capture all logs
+    
+    # Create file handler
+    file_handler = logging.FileHandler(log_file, encoding='utf-8')
+    file_handler.setLevel(logging.DEBUG)
+    
+    # Create console handler
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(logging.INFO)  # Console can remain at INFO
+    
+    # Create formatter
+    formatter = logging.Formatter('%(levelname)s: %(message)s')
+    file_handler.setFormatter(formatter)
+    console_handler.setFormatter(formatter)
+    
+    # Add handlers to logger
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+    
+    logging.info("Logging initialized")
+
+
+def main() -> None:
+    """
+    Main function to run the Dependency Analyzer.
+    """
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description="Dependency Analyzer")
     parser.add_argument(
         "-c", "--config",
-        default="config.json",
-        help="Path to the configuration file (default: config.json)"
+        default=DEFAULT_CONFIG_FILE,
+        help=f"Path to the configuration file (default: {DEFAULT_CONFIG_FILE})"
     )
     parser.add_argument(
-        "-o", "--output",
-        default=DEFAULT_OUTPUT_FILE,
-        help=f"Path to the output report file (default: {DEFAULT_OUTPUT_FILE})"
-    )
-    parser.add_argument(
-        "-v", "--verbose",
-        action="store_true",
-        help="Enable verbose logging"
+        "-l", "--log",
+        default=DEFAULT_LOG_FILE,
+        help=f"Path to the log file (default: {DEFAULT_LOG_FILE})"
     )
     args = parser.parse_args()
     
     # Set up logging
-    log_level = logging.DEBUG if args.verbose else logging.INFO
-    setup_logging(level=log_level)
+    setup_logging(args.log)
     
-    logger = logging.getLogger("main")
-    logger.info("Dependency Analyzer starting...")
-    
+    # Create the report generator and generate the report
+    generator = DependencyReportGenerator()
     try:
-        # Check if config file exists
-        config_path = Path(args.config)
-        if not config_path.exists():
-            raise ConfigurationError(f"Configuration file not found: {config_path}")
-        
-        # Create and run the report generator
-        generator = DependencyReportGenerator(default_output_file=args.output)
-        generator.generate_report(str(config_path))
-        
-        # Print success message
-        print(f"\nDependency analysis completed successfully.")
-        print(f"Report saved to: {args.output}")
-        return 0
-        
-    except ConfigurationError as e:
-        logger.error(f"Configuration error: {str(e)}")
-        print(f"\nConfiguration error: {str(e)}")
-        print("Please check your configuration file and try again.")
-        return 1
-        
-    except DependencyAnalyzerError as e:
-        logger.error(f"Error during dependency analysis: {str(e)}")
-        print(f"\nError during dependency analysis: {str(e)}")
-        print("Check the log file for more details.")
-        return 1
-        
+        generator.generate_report(args.config)
+        logging.info("Dependency analysis completed successfully.")
+        logging.info(f"Report saved to: {generator.default_output_file}")
     except Exception as e:
-        logger.exception(f"Unexpected error: {str(e)}")
-        print(f"\nAn unexpected error occurred: {str(e)}")
-        print("Check the log file for more details.")
-        return 1
+        logging.error(f"Failed to generate dependency report: {str(e)}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
