@@ -16,12 +16,12 @@ from typing import Dict, List, Any
 from dotenv import load_dotenv
 
 # Use absolute imports
-from plutonium.core.factory import DependencyAnalyzerFactory
-from plutonium.core.config_validator import ConfigValidator
-from plutonium.core.constants import DEFAULT_OUTPUT_FILE
-from plutonium.core.exceptions import DependencyAnalyzerError, ConfigurationError, ParsingError
-from plutonium.core.cache import VersionCache
-from plutonium.core.report_formatter import ReportFormatter  # New import
+from ..core.factory import DependencyAnalyzerFactory
+from ..core.config_validator import ConfigValidator
+from ..core.constants import DEFAULT_OUTPUT_FILE
+from ..core.exceptions import DependencyAnalyzerError, ConfigurationError, ParsingError
+from ..core.cache import VersionCache
+from ..core.report_formatter import ReportFormatter  # New import
 
 
 class DependencyReportGenerator:

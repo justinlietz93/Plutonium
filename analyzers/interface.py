@@ -12,9 +12,15 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 
 # Use absolute imports
-from plutonium.core.cache import VersionCache
-from plutonium.core.constants import DEFAULT_TIMEOUT
-from plutonium.core.vulnerability_checker import VulnerabilityChecker
+from abc import ABC, abstractmethod
+import logging
+import concurrent.futures
+from pathlib import Path
+from typing import Dict, List, Tuple, Optional
+
+from ..core.cache import VersionCache
+from ..core.constants import DEFAULT_TIMEOUT
+from ..core.vulnerability_checker import VulnerabilityChecker
 
 
 class IDependencyAnalyzer(ABC):

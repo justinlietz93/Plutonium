@@ -10,7 +10,7 @@ import logging
 import sys
 from pathlib import Path
 
-# Use absolute imports
+# Change from relative imports to absolute imports
 from plutonium.core.generator import DependencyReportGenerator
 from plutonium.core.constants import DEFAULT_CONFIG_FILE, DEFAULT_LOG_FILE
 

@@ -9,17 +9,17 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-# Use absolute imports
-from plutonium.analyzers.interface import IDependencyAnalyzer
-from plutonium.core.cache import VersionCache
-from plutonium.core.constants import SUPPORTED_ENVIRONMENTS, DEPENDENCY_FILES
+# Use relative imports within the package
+from ..analyzers.interface import IDependencyAnalyzer
+from .cache import VersionCache  # Corrected relative import
+from .constants import SUPPORTED_ENVIRONMENTS, DEPENDENCY_FILES # Also correct this one for consistency
 
 # Import all concrete analyzer classes
-from plutonium.analyzers.nodejs_analyzer import NodeJsAnalyzer
-from plutonium.analyzers.python_analyzer import PythonAnalyzer
-from plutonium.analyzers.ruby_analyzer import RubyAnalyzer
-from plutonium.analyzers.maven_analyzer import MavenAnalyzer
-from plutonium.analyzers.go_analyzer import GoAnalyzer
+from ..analyzers.nodejs_analyzer import NodeJsAnalyzer
+from ..analyzers.python_analyzer import PythonAnalyzer
+from ..analyzers.ruby_analyzer import RubyAnalyzer
+from ..analyzers.maven_analyzer import MavenAnalyzer
+from ..analyzers.go_analyzer import GoAnalyzer
 
 
 class DependencyAnalyzerFactory:

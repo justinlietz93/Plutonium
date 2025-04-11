@@ -123,7 +123,7 @@ This report shows the current and latest versions of dependencies across project
 | posthog-node | 4.8.1 | 4.11.3 ⚠️ |
 | prettier | 3.3.3 | 3.5.3 ⚠️ |
 | puppeteer-chromium-resolver | 23.0.0 | 24.0.1 ⚠️ |
-| puppeteer-core | 23.4.0 | 24.6.1 ⚠️ |
+| puppeteer-..core | 23.4.0 | 24.6.1 ⚠️ |
 | react | 19.1.0 | 19.1.0 ✅ |
 | react-use | 17.6.0 | 17.6.0 ✅ |
 | serialize-error | 11.0.3 | 12.0.0 ⚠️ |

@@ -81,7 +81,7 @@
   "npm:strip-ansi": "7.1.0",
   "npm:tree-sitter-wasms": "0.1.12",
   "npm:serialize-error": "12.0.0",
-  "npm:puppeteer-core": "24.6.1",
+  "npm:puppeteer-..core": "24.6.1",
   "npm:turndown": "7.2.0",
   "npm:@anthropic-ai/bedrock-sdk": "0.12.4",
   "npm:vscode-jsonrpc": "8.2.1",

@@ -99,7 +99,7 @@ We follow standard Python best practices with some specific requirements:
 
 ### Error Handling
 
-- Use the custom exception types defined in `core/exceptions.py`.
+- Use the custom exception types defined in `..core/exceptions.py`.
 - Include meaningful error messages.
 - Log relevant information for debugging.
 
@@ -121,7 +121,7 @@ pytest --cov=plutonium --cov-report=html tests/
 ### Writing Tests
 
 - All new features should include tests.
-- Tests should be placed in the `tests/` directory with a filename matching the module being tested (e.g., `test_cache.py` for `core/cache.py`).
+- Tests should be placed in the `tests/` directory with a filename matching the module being tested (e.g., `test_cache.py` for `..core/cache.py`).
 - Use fixtures and mocks appropriately to avoid external dependencies in unit tests.
 
 ## Adding Support for a New Language
@@ -152,7 +152,7 @@ To add support for a new programming language or dependency management system:
 
 2. **Update Constants**
 
-   In `core/constants.py`, add your new environment:
+   In `..core/constants.py`, add your new environment:
 
    ```python
    # Add to SUPPORTED_ENVIRONMENTS
@@ -185,7 +185,7 @@ To add support for a new programming language or dependency management system:
 
 3. **Update Factory**
 
-   In `core/factory.py`, update the `create_analyzers` method to create instances of your new analyzer:
+   In `..core/factory.py`, update the `create_analyzers` method to create instances of your new analyzer:
 
    ```python
    # First, import your new analyzer

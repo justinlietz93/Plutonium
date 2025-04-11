@@ -8,36 +8,36 @@ The Dependency Analyzer is designed to be modular, extensible, and maintainable.
 
 ## Main Components
 
-### 1. Core Components
+### 1. ..core Components
 
-#### Configuration and Validation (`core/config_validator.py`)
+#### Configuration and Validation (`..core/config_validator.py`)
 - Validates the user-provided configuration file
 - Ensures all required fields are present and valid
 - Verifies that paths exist and environments are supported
 
-#### Factory (`core/factory.py`)
+#### Factory (`..core/factory.py`)
 - Creates appropriate analyzer instances based on the environment type
 - Checks for the existence of dependency files
 - Manages shared resources (e.g., version cache)
 
-#### Report Generator (`core/generator.py`)
+#### Report Generator (`..core/generator.py`)
 - Orchestrates the overall analysis process
 - Manages the generation of the Markdown report
 - Handles errors from individual analyzers
 
-#### Cache (`core/cache.py`)
+#### Cache (`..core/cache.py`)
 - Provides caching for package versions to improve performance
 - Persists cache to disk between runs
 
-#### Logging (`core/logging.py`)
+#### Logging (`..core/logging.py`)
 - Configures logging for the application
 - Provides log file and console output
 
-#### Exceptions (`core/exceptions.py`)
+#### Exceptions (`..core/exceptions.py`)
 - Defines custom exception types for better error handling
 - Provides utility functions like `run_command` for executing external processes
 
-#### Constants (`core/constants.py`)
+#### Constants (`..core/constants.py`)
 - Centralizes configuration constants
 - Defines supported environments, dependency files, and API URLs
 

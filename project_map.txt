@@ -7,7 +7,7 @@ Plutonium/
 │   ├── python_analyzer.py
 │   ├── ruby_analyzer.py
 │   └── go_analyzer.py
-├── core/
+├── ..core/
 │   ├── __init__.py
 │   ├── cache.py
 │   ├── config_validator.py

@@ -1,2 +1,4 @@
-# LLM Prompt: This file makes the "core" directory a Python package.
+"""
+Core components for the Plutonium dependency analyzer.
+"""
 

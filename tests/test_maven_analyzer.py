@@ -47,7 +47,7 @@ class TestMavenAnalyzer:
     <dependencies>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
+            <artifactId>spring-..core</artifactId>
             <version>${spring.version}</version>
         </dependency>
         <dependency>
@@ -100,8 +100,8 @@ class TestMavenAnalyzer:
             
             # Check that we have the expected dependencies
             assert len(dependencies) >= 3  # Excluding test dependencies
-            assert "org.springframework:spring-core" in dependencies
-            assert dependencies["org.springframework:spring-core"] == "${spring.version}"
+            assert "org.springframework:spring-..core" in dependencies
+            assert dependencies["org.springframework:spring-..core"] == "${spring.version}"
             assert dependencies["org.projectlombok:lombok"] == "1.18.20"
     
     def test_parse_dependencies_error(self, maven_analyzer):
@@ -115,10 +115,10 @@ class TestMavenAnalyzer:
         # Setup mock cache to return a hit
         maven_analyzer.cache.get.return_value = "5.3.20"
         
-        version = maven_analyzer.get_latest_version("org.springframework:spring-core")
+        version = maven_analyzer.get_latest_version("org.springframework:spring-..core")
         
         # Verify cache was checked with the correct key
-        maven_analyzer.cache.get.assert_called_once_with("maven:org.springframework:spring-core")
+        maven_analyzer.cache.get.assert_called_once_with("maven:org.springframework:spring-..core")
         
         # Verify we got the cached version
         assert version == "5.3.20"
@@ -134,14 +134,14 @@ class TestMavenAnalyzer:
                 "docs": [
                     {
                         "g": "org.springframework",
-                        "a": "spring-core",
+                        "a": "spring-..core",
                         "latestVersion": "5.3.20",
                         "timestamp": 1650000000000,
                         "v": "5.3.20"
                     },
                     {
                         "g": "org.springframework",
-                        "a": "spring-core",
+                        "a": "spring-..core",
                         "v": "5.3.19",
                         "timestamp": 1645000000000
                     }
@@ -150,14 +150,14 @@ class TestMavenAnalyzer:
         }
         
         with patch("requests.get", return_value=mock_response):
-            version = maven_analyzer.get_latest_version("org.springframework:spring-core")
+            version = maven_analyzer.get_latest_version("org.springframework:spring-..core")
             
             # Verify cache was checked
             maven_analyzer.cache.get.assert_called_once()
             
             # Verify the version was cached
             maven_analyzer.cache.set.assert_called_once_with(
-                "maven:org.springframework:spring-core", "5.3.20"
+                "maven:org.springframework:spring-..core", "5.3.20"
             )
             
             # Verify we got the expected version
@@ -171,7 +171,7 @@ class TestMavenAnalyzer:
         # Mock API call to raise an exception
         with patch("requests.get", side_effect=requests.RequestException("API error")):
             with pytest.raises(NetworkError):
-                maven_analyzer.get_latest_version("org.springframework:spring-core")
+                maven_analyzer.get_latest_version("org.springframework:spring-..core")
     
     def test_get_installed_dependencies_with_latest(self, maven_analyzer):
         """Test getting the latest versions for all dependencies."""
@@ -179,7 +179,7 @@ class TestMavenAnalyzer:
         maven_analyzer.get_latest_version = MagicMock(side_effect=lambda pkg: f"{pkg}-latest")
         
         dependencies = {
-            "org.springframework:spring-core": "5.3.9",
+            "org.springframework:spring-..core": "5.3.9",
             "org.projectlombok:lombok": "1.18.20"
         }
         
@@ -204,14 +204,14 @@ class TestMavenAnalyzer:
             # Mock _parse_dependencies
             with patch.object(
                 maven_analyzer, "_parse_dependencies", return_value={
-                    "org.springframework:spring-core": "5.3.9",
+                    "org.springframework:spring-..core": "5.3.9",
                     "org.projectlombok:lombok": "1.18.20"
                 }
             ):
                 # Mock _get_installed_dependencies_with_latest
                 with patch.object(
                     maven_analyzer, "_get_installed_dependencies_with_latest", return_value=[
-                        ("org.springframework:spring-core", "5.3.9", "5.3.20"),
+                        ("org.springframework:spring-..core", "5.3.9", "5.3.20"),
                         ("org.projectlombok:lombok", "1.18.20", "1.18.22")
                     ]
                 ):
@@ -231,7 +231,7 @@ class TestMavenAnalyzer:
                         assert output_file == "output.md"
                         
                         # Verify the content includes the dependencies
-                        assert "spring-core" in content
+                        assert "spring-..core" in content
                         assert "lombok" in content
                         assert "5.3.9" in content
                         assert "5.3.20" in content

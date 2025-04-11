@@ -1,12 +1,11 @@
 """
 Node.js dependency analyzer module.
 
-This module provides functionality to analyze dependencies in Node.js projects.
+This module provides functionality to analyze Node.js dependencies
+by parsing package.json files and fetching the latest versions.
 """
 
 import json
-import os
-import requests
 import logging
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
@@ -15,6 +14,7 @@ from .interface import IDependencyAnalyzer
 from ..core.constants import API_URLS, DEFAULT_TIMEOUT
 from ..core.exceptions import run_command, CommandExecutionError, NetworkError, ParsingError
 from ..core.cache import VersionCache
+import requests
 
 
 class NodeJsAnalyzer(IDependencyAnalyzer):
@@ -22,65 +22,14 @@ class NodeJsAnalyzer(IDependencyAnalyzer):
     
     @property
     def environment_name(self) -> str:
-        """Get the environment name."""
         return "Node.js"
-    
-    def _get_dependency_file_path(self, directory: str) -> Path:
-        """
-        Get the path to package.json in the specified directory.
-        
-        Args:
-            directory: The directory to search for package.json
-            
-        Returns:
-            The Path object for package.json
-            
-        Raises:
-            FileNotFoundError: If package.json doesn't exist
-        """
-        package_json_path = Path(directory) / "package.json"
-        if not package_json_path.exists():
-            raise FileNotFoundError(f"package.json not found in {directory}")
-        return package_json_path
-    
-    def _parse_dependencies(self, file_path: Path) -> Dict[str, str]:
-        """
-        Parse package.json and extract the dependencies.
-        
-        Args:
-            file_path: The path to package.json
-            
-        Returns:
-            A dictionary mapping package names to their current versions
-            
-        Raises:
-            ParsingError: If there's an error parsing package.json
-        """
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                package_data = json.load(f)
-            
-            # Extract dependencies and devDependencies
-            dependencies = {}
-            dependencies.update(package_data.get('dependencies', {}))
-            dependencies.update(package_data.get('devDependencies', {}))
-            
-            # Clean up version strings (remove ^, ~, etc.)
-            for pkg, version in dependencies.items():
-                if version.startswith('^') or version.startswith('~'):
-                    dependencies[pkg] = version[1:]
-            
-            return dependencies
-        
-        except (json.JSONDecodeError, IOError) as e:
-            raise ParsingError(f"Error parsing package.json: {str(e)}")
     
     def get_latest_version(self, package_name: str) -> str:
         """
-        Get the latest version of an npm package.
+        Get the latest version of a Node.js package from npm.
         
         Args:
-            package_name: The name of the npm package
+            package_name: The name of the package
             
         Returns:
             The latest version as a string
@@ -89,69 +38,103 @@ class NodeJsAnalyzer(IDependencyAnalyzer):
             NetworkError: If there's an issue fetching the latest version
             ValueError: If the package doesn't exist or another error occurs
         """
-        # Not in cache, fetch from npm registry
-        url = API_URLS['npm'].format(package=package_name)
-        self.logger.debug(f"Fetching latest version for {package_name} from {url}")
+        # Check cache first
+        cached_version = self.cache.get(package_name)
+        if cached_version:
+            self.logger.debug(f"Cache hit for {package_name}: {cached_version}")
+            return cached_version
         
+        # Fetch from npm registry
+        url = API_URLS["npm"].format(package=package_name)
         try:
             response = requests.get(url, timeout=DEFAULT_TIMEOUT)
             response.raise_for_status()
-            
             data = response.json()
-            if 'dist-tags' in data and 'latest' in data['dist-tags']:
-                latest_version = data['dist-tags']['latest']
-                return latest_version
-            else:
-                raise ValueError(f"Unable to determine latest version for {package_name}")
-            
+            latest_version = data["dist-tags"]["latest"]
+            self.cache.set(package_name, latest_version)
+            return latest_version
         except requests.RequestException as e:
-            raise NetworkError(f"Error fetching latest version for {package_name}: {str(e)}")
-        except (ValueError, KeyError) as e:
-            raise ValueError(f"Error processing npm response for {package_name}: {str(e)}")
+            self.logger.error(f"Network error fetching latest version for {package_name}: {str(e)}")
+            raise NetworkError(f"Failed to fetch latest version for {package_name}: {str(e)}")
+        except (KeyError, ValueError) as e:
+            self.logger.error(f"Error parsing npm response for {package_name}: {str(e)}")
+            raise ValueError(f"Failed to parse latest version for {package_name}: {str(e)}")
     
-    def analyze_dependencies(self, directory: str, output_file: str) -> None:
+    def analyze_dependencies(self, directory: str) -> List[Tuple[str, str, str, List[str]]]:
         """
-        Analyze Node.js dependencies in the specified directory.
-        
+        Analyze Node.js dependencies in the specified directory and return the results.
+
         Args:
-            directory: The directory containing package.json
-            output_file: The path to the output file where results will be written
+            directory: The directory containing the package.json file to analyze
+            
+        Returns:
+            A list of tuples (package_name, current_version, latest_version, vulnerabilities)
             
         Raises:
-            FileNotFoundError: If package.json doesn't exist
-            ParsingError: If there's an error parsing package.json
+            FileNotFoundError: If the package.json file doesn't exist
+            ParsingError: If there's an error parsing the package.json file
+            NetworkError: If there's an issue fetching latest versions
+        """
+        self.logger.info(f"Analyzing Node.js dependencies in {directory}")
+        
+        # Find the package.json file
+        dependency_file = self._get_dependency_file_path(directory)
+        
+        # Parse the dependencies
+        dependencies = self._parse_dependencies(dependency_file)
+        
+        # Get the latest versions and vulnerabilities
+        dependency_info = self._get_installed_dependencies_with_latest(dependencies)
+        
+        self.logger.info(f"Found {len(dependency_info)} dependencies")
+        return dependency_info
+    
+    def _get_dependency_file_path(self, directory: str) -> Path:
+        """
+        Get the path to the package.json file in the specified directory.
+        
+        Args:
+            directory: The directory to search for the package.json file
+            
+        Returns:
+            The Path object for the package.json file
+            
+        Raises:
+            FileNotFoundError: If the package.json file doesn't exist
+        """
+        file_path = Path(directory) / "package.json"
+        if not file_path.exists():
+            self.logger.error(f"package.json not found in {directory}")
+            raise FileNotFoundError(f"package.json not found in {directory}")
+        return file_path
+    
+    def _parse_dependencies(self, file_path: Path) -> Dict[str, str]:
+        """
+        Parse the package.json file and extract the dependencies.
+        
+        Args:
+            file_path: The path to the package.json file
+            
+        Returns:
+            A dictionary mapping package names to their current versions
+            
+        Raises:
+            ParsingError: If there's an error parsing the package.json file
         """
         try:
-            self.logger.info(f"Analyzing Node.js dependencies in {directory}")
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
             
-            # Get dependency file path
-            package_json_path = self._get_dependency_file_path(directory)
+            dependencies = {}
+            # Include both dependencies and devDependencies
+            for dep_type in ("dependencies", "devDependencies"):
+                if dep_type in data:
+                    for package, version in data[dep_type].items():
+                        # Remove any version range specifiers (e.g., "^1.2.3" -> "1.2.3")
+                        version = version.lstrip("^~").split("@")[-1]
+                        dependencies[package] = version
             
-            # Parse dependencies
-            dependencies = self._parse_dependencies(package_json_path)
-            
-            if not dependencies:
-                self.logger.info(f"No dependencies found in {directory}")
-                # Write empty section to report
-                content = self.format_markdown_section(directory, [])
-                self.write_to_report(output_file, content)
-                return
-            
-            self.logger.info(f"Found {len(dependencies)} dependencies")
-            
-            # Get latest versions and vulnerabilities
-            dependencies_with_latest_and_vulns = self._get_installed_dependencies_with_latest(dependencies)
-            
-            # Format and write to report
-            content = self.format_markdown_section(directory, dependencies_with_latest_and_vulns)
-            self.write_to_report(output_file, content)
-            
-            self.logger.info(f"Node.js dependency analysis for {directory} completed")
-            
-        except Exception as e:
-            self.logger.error(f"Error analyzing Node.js dependencies in {directory}: {str(e)}")
-            # Write error to report
-            error_content = f"## Node.js Dependencies in {directory}\n\n"
-            error_content += f"Error analyzing dependencies: {str(e)}\n\n"
-            self.write_to_report(output_file, error_content)
-            raise
+            return dependencies
+        except (IOError, json.JSONDecodeError) as e:
+            self.logger.error(f"Error parsing package.json: {str(e)}")
+            raise ParsingError(f"Failed to parse package.json: {str(e)}")
