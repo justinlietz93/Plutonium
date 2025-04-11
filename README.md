@@ -1,5 +1,4 @@
-# Plutonium Dependency Analyzer
-# Plutonium Dependency Analyzer
+# Plutonium Dependency Manager
 
 A cross-language dependency analysis tool that helps you track, compare, and auto-fix dependencies across multiple programming environments. The tool analyzes dependencies in Node.js, Python, Ruby, Maven (Java), and Go projects, generates a comprehensive Markdown report showing current versions compared to the latest available versions, and automatically resolves dependency conflicts and security vulnerabilities in the local development environment.
 
