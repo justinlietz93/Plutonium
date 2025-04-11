@@ -1,4 +1,4 @@
-# Plutoneum Dependency Analyzer
+# Plutonium Dependency Analyzer
 
 A cross-language dependency analysis tool that helps you track and compare your project dependencies across multiple programming environments. The tool analyzes dependencies in Node.js, Python, Ruby, Maven (Java), and Go projects, and generates a comprehensive Markdown report showing current versions compared to the latest available versions.
 
@@ -16,8 +16,8 @@ A cross-language dependency analysis tool that helps you track and compare your 
 
 1. Clone the repository:
    ```
-   git clone https://github.com/justinlietz93/plutoneum.git
-   cd plutoneum
+   git clone https://github.com/justinlietz93/Plutonium.git
+   cd Plutonium
    ```
 
 2. Install dependencies:
