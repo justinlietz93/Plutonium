@@ -23,17 +23,20 @@ DEPENDENCY_FILES = {
     "Go": "go.mod"
 }
 
+VULNCHECK_API_TOKEN_ENV_VAR = "VULNCHECK_API_KEY"
+
 # API URLs for fetching latest package versions
 API_URLS = {
-    "npm": "https://registry.npmjs.org/{package}",
+    "NPM": "https://registry.npmjs.org/{package}",
     "PyPI": "https://pypi.org/pypi/{package}/json",
     "RubyGems": "https://rubygems.org/api/v1/gems/{package}.json",
     "Maven": "https://search.maven.org/solrsearch/select?q=g:{group_id}+AND+a:{artifact_id}&wt=json",
-    "Go": "https://proxy.golang.org/{package}/@v/list"
+    "Go": "https://proxy.golang.org/{package}/@v/list",
+    "VulnCheck_PURL": "https://api.vulncheck.com/v3/purl",
 }
 
 # Other constants
-DEFAULT_TIMEOUT = 10  # seconds
+DEFAULT_TIMEOUT = 15  # seconds
 CACHE_TTL = 86400  # 24 hours in seconds
 DEFAULT_OUTPUT_FILE = "plutonium_report.md"
 DEFAULT_CONFIG_FILE = "config.json"

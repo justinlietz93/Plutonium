@@ -1,6 +1,11 @@
-# Plutonium Dependency Manager
+<p align="center">
+<img src="docs/plutonium-icon.png" alt="Plutonium Logo" width="200"/>
+</p>
 
-A cross-language dependency analysis tool that helps you track, compare, and auto-fix dependencies across multiple programming environments. The tool analyzes dependencies in Node.js, Python, Ruby, Maven (Java), and Go projects, generates a comprehensive Markdown report showing current versions compared to the latest available versions, and automatically resolves dependency conflicts and security vulnerabilities in the local development environment.
+
+<h1 align="center">Plutonium</h1><br><h3 align="center">Dependency Manager</h3>
+
+<p align="center">A cross-language dependency analysis tool that helps you track, compare, and auto-fix dependencies across multiple programming environments. The tool analyzes dependencies in Node.js, Python, Ruby, Maven (Java), and Go projects, generates a comprehensive Markdown report showing current versions compared to the latest available versions, and automatically resolves dependency conflicts and security vulnerabilities in the local development environment.</p>
 
 ## Features
 
@@ -23,6 +28,13 @@ A cross-language dependency analysis tool that helps you track, compare, and aut
 ### Installation
 
 1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/justinlietz93/plutonium.git
+   cd plutonium
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/justinlietz93/plutonium.git
+   cd plutonium
    ```bash
    git clone https://github.com/justinlietz93/plutonium.git
    cd plutonium

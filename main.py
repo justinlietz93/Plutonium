@@ -10,7 +10,7 @@ import logging
 import sys
 from pathlib import Path
 
-# Change from relative imports to absolute imports
+# Use absolute imports for PyInstaller compatibility
 from plutonium.core.generator import DependencyReportGenerator
 from plutonium.core.constants import DEFAULT_CONFIG_FILE, DEFAULT_LOG_FILE
 
