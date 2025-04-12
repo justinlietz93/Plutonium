@@ -1,40 +1,46 @@
 <p align="center">
-<img src="docs/plutonium-icon.png" alt="Plutonium Logo" width="200"/>
+  <img src="docs/plutonium-icon.png" alt="Plutonium Logo" width="200"/>
 </p>
 
+<h1 align="center">Plutonium</h1>
 
-<h1 align="center">Plutonium</h1><br><h3 align="center">Dependency Manager</h3>
+<p align="center">
+  <strong>A cross-language dependency manager and analysis tool.</strong>
+</p>
 
-<p align="center">A cross-language dependency analysis tool that helps you track, compare, and auto-fix dependencies across multiple programming environments. The tool analyzes dependencies in Node.js, Python, Ruby, Maven (Java), and Go projects, generates a comprehensive Markdown report showing current versions compared to the latest available versions, and automatically resolves dependency conflicts and security vulnerabilities in the local development environment.</p>
+<p align="center">
+  Plutonium helps you track, compare, and auto-fix dependencies across multiple programming environments. It analyzes dependencies in Node.js, Python, Ruby, Maven (Java), and Go projects, generates comprehensive Markdown reports comparing current vs. latest versions, and automatically resolves dependency conflicts and security vulnerabilities locally.
+</p>
 
-## Features
+<p align="center">
+  <a href="https://pypi.org/project/plutonium/">
+    <img src="https://img.shields.io/pypi/v/plutonium?style=flat-square" alt="PyPI version"/>
+  </a>
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square" alt="License: MIT"/>
+  </a>
+  <a href="https://www.python.org/downloads/">
+    <img src="https://img.shields.io/badge/python-3.12+-blue.svg?style=flat-square" alt="Python 3.12+"/>
+  </a>
+</p>
 
-- **Cross-Language Support**: Analyzes dependencies in Node.js, Python, Ruby, Maven, and Go projects.
-- **Version Comparison**: Compares current dependency versions with the latest available versions.
-- **Auto-Fixing**: Automatically resolves dependency conflicts (e.g., version mismatches) and security vulnerabilities (e.g., by upgrading to secure versions using the NVD API).
-- **Markdown Report**: Generates a detailed report with tables showing dependency statuses, conflict resolutions, and security fixes.
-- **Extensible**: Easily add support for new programming languages by implementing new analyzers.
+## Key Features
+
+* **Cross-Language Support**: Analyze dependencies for Node.js (npm), Python (pip), Ruby (Bundler), Java (Maven), and Go projects.
+* **Version Comparison**: Identify outdated dependencies by comparing installed versions against the latest available releases.
+* **Automated Remediation**: Resolve dependency conflicts (e.g., version mismatches) and security vulnerabilities (using NVD API integration) automatically.
+* **Comprehensive Reporting**: Generate detailed Markdown reports outlining dependency statuses, conflicts resolved, and security fixes applied.
+* **Extensible Architecture**: Designed for straightforward extension to support additional languages and package managers.
 
 ## Prerequisites
 
-- **Python 3.12+**: Ensure Python 3.12 or higher is installed on your system.
-- **External Tools** (only needed for languages you're analyzing):
-  - **Node.js and npm**: For analyzing Node.js projects.
-  - **pip**: For analyzing Python projects (included with Python 3.12).
-  - **Ruby and Bundler**: For analyzing Ruby projects.
-  - **Maven**: For analyzing Java projects.
-  - **Go**: For analyzing Go projects.
+* **Python**: Version 3.12 or higher is required.
+* **Language-Specific Toolchains**: Install the necessary tools only for the languages you intend to analyze:
+    * **Node.js**: Node.js and npm
+    * **Python**: pip (typically included with Python 3.4+)
+    * **Ruby**: Ruby and Bundler
+    * **Java**: Maven
+    * **Go**: Go toolchain
 
-### Installation
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/justinlietz93/plutonium.git
-   cd plutonium
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/justinlietz93/plutonium.git
-   cd plutonium
-   ```bash
-   git clone https://github.com/justinlietz93/plutonium.git
-   cd plutonium
+---
